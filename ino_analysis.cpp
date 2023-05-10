@@ -92,19 +92,25 @@ void ino_analysis::SlaveBegin(TTree * /*tree*/)
 
 
     fittree->Branch("ENum",&ENum,"ENum/i");
-    fittree->Branch("layer_multiplicity",&layermult,"xlmult/I:ylmult/I");
-    fittree->Branch("tdc",&tdc,"xtdc[12]/D:ytdc[12]/D:xtdcmult[12]/i:ytdcmult[12]/i:tdcref/D");
-    fittree->Branch("time","TTimeStamp",&Evetime,10000,0);
-    if(option==TString("MAG")){
-        fittree->Branch("X_Fit",&xfitparam2,"xp0:xp1:xp2:xerrp0:xerrp1:xerrp2:xndf:xchisq");
-        fittree->Branch("Y_Fit",&yfitparam2,"yp0:yp1:yp2:yerrp0:yerrp1:yerrp2:yndf:ychisq");
-    }
-    else{
-        fittree->Branch("X_Fit",&xfitparam1,"xp0:xp1:xerrp0:xerrp1:xndf:xchisq");
-        fittree->Branch("Y_Fit",&yfitparam1,"yp0:yp1:yerrp0:yerrp1:yndf:ychisq");
-    }
-    fittree->Branch("angle",&angle,"zen/f:azi/f");
-    fittree->Branch("efficiency",&eff,"xeff[12]/i:yeff[12]/i");
+    // fittree->Branch("time","TTimeStamp",&Evetime,10000,0);
+    fittree->Branch("xside","TGraphErrors",fxgraph,128000,0); 
+    fittree->Branch("yside","TGraphErrors",fygraph,128000,0); 
+
+    // section required to store angle and parameters - uncomment for using
+    // fittree->Branch("layer_multiplicity",&layermult,"xlmult/I:ylmult/I");
+    // fittree->Branch("tdc",&tdc,"xtdc[12]/D:ytdc[12]/D:xtdcmult[12]/i:ytdcmult[12]/i:tdcref/D");
+    // if(option==TString("MAG")){
+    //     fittree->Branch("X_Fit",&xfitparam2,"xp0:xp1:xp2:xerrp0:xerrp1:xerrp2:xndf:xchisq");
+    //     fittree->Branch("Y_Fit",&yfitparam2,"yp0:yp1:yp2:yerrp0:yerrp1:yerrp2:yndf:ychisq");
+    // }
+    // else{
+    //     fittree->Branch("X_Fit",&xfitparam1,"xp0:xp1:xerrp0:xerrp1:xndf:xchisq");
+    //     fittree->Branch("Y_Fit",&yfitparam1,"yp0:yp1:yerrp0:yerrp1:yndf:ychisq");
+    // }
+    // fittree->Branch("angle",&angle,"zen/f:azi/f");
+    // fittree->Branch("efficiency",&eff,"xeff[12]/i:yeff[12]/i");
+    // end
+
     TString xname,yname;
 
     for(int ii=0;ii<NL;ii++){
@@ -209,7 +215,6 @@ Bool_t ino_analysis::Process(Long64_t entry)
     //    graph->SetPoint(ENum, ENum, angle.zen);
     return kTRUE;
 
-    return kTRUE;
 }
 
 TGraphErrors* ino_analysis::GetXGraph(){

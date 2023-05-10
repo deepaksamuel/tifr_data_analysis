@@ -4,7 +4,11 @@
 #include <TFile.h>
 #include <iostream>
 #include "ino_analysis.h"
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
 
+using namespace TMVA;
 using namespace ::std;
 int main()
 {
