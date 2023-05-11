@@ -4,6 +4,8 @@
 //g++ -o analysis convert_ascii.cpp main.cpp `root-config --glibs --cflags`
 //./analysis.out
 // enable header files accordingly
+// On GPU
+// /opt/rh/devtoolset-11/root/bin/g++ -o analysis convert_ascii.cpp main.cpp `root-config --glibs --cflags`
 #include <TTree.h>
 #include <TFile.h>
 #include <iostream>
@@ -27,6 +29,18 @@ int main()
         exit(-1);
     }
 
+    TString tok;
+    TString fileName;
+    Ssiz_t from = 0;
+    while (input.Tokenize(tok, from, "/")) {
+    if(tok.Length()!=0)
+    fileName=tok;
+    }
+    cout<<"Input file: "<<fileName<<endl;
+    TString outFile = fileName.ReplaceAll(".ire",".csv");
+    cout<<"output file: "<<outFile<<endl;
+
+
  
     TTree *T = (TTree *)file->Get("evetree");
     int N = T->GetEntries();
@@ -34,7 +48,7 @@ int main()
 
     //ino_analysis *a = new ino_analysis(T); // enable this line for angle analysis
     convert_ascii *a = new convert_ascii(T); // enable this line for writing ino data to ascii (only enum, event hits and timestamps)
-    a->setOutFileName(input+".csv"); // or  a->setOutFileName(input+".fit") for ino_analysis class
+    a->setOutFileName(outFile); // or  a->setOutFileName(input+".fit") for ino_analysis class
     a->Init(T);
     a->SlaveBegin(T);
 
