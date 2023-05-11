@@ -5,8 +5,8 @@
 // found on file: /home/samuel/DAQDATA/Data/INORUN_150412_203036.ire
 //////////////////////////////////////////////////////////
 
-#ifndef main_h
-#define main_h
+#ifndef INO_ANALYSIS_H
+#define INO_ANALYSIS_H
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -23,6 +23,7 @@
 #include <TGraphErrors.h>
 #include <TBits.h>
 #include "TProofOutputFile.h"
+
 
 #define MAXMULT 3 // Maximum multiplicity reqd. for taking a layer into fitting, Default: 2 // DS: 8
 #define MINLAY 4 // Minimum layers reqd for taking an event for fitting. Default: 4, do not decrease less than 3 // DS: 3
@@ -139,7 +140,7 @@ public :
     TBranch        *b_TDCmult;   //!
     TBranch        *b_TDCref;   //!
 
-    ino_analysis(TTree * /*tree*/ =0) : fChain(0) { }
+    ino_analysis(TTree * /*tree*/ =0) : fChain(0) { outFileName="out.fit";}
     virtual ~ino_analysis();
     // virtual Int_t   Version() const { return 2; }
     virtual void    Begin(TTree *tree);
@@ -191,7 +192,8 @@ public :
     void FitData2(TGraphErrors *g,FITPARAM2& f, int mult[NL]); //get fit parameters for graph g and save in f using multiplicity
     void GetEfficiency2(FITPARAM2 &f, TGraphErrors *g,int mult[NL], int eff[NL]);
     bool CheckTrackCoverage(FITPARAM1& f);  // returns true if fitted track is confined within the fiducial volume of Layer 0 and Layer 11
-
+    int  getStripID(int layer, int strip, bool isXside=true);
+    void setOutFileName(TString name){outFileName=name;}
     TF1 *fitfunction;
     MULTIPLICITY multiplicity;
     TDC tdc;

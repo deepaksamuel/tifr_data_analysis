@@ -85,30 +85,31 @@ void ino_analysis::SlaveBegin(TTree * /*tree*/)
         // Warning("SlaveBegin","Option: None - Using First order fitting");
         fitfunction=new TF1("Lin_Fit","pol1", 0,0);
     }
-
-    TFile *outFile = new TFile("out.fit","RECREATE");
+    
+    TFile *outFile = new TFile(outFileName,"RECREATE");
     fFile = outFile;
     fittree = new TTree("analysis_results","Analysis Results");  //GetOutputList()->Add(fittree);
 
 
     fittree->Branch("ENum",&ENum,"ENum/i");
-    // fittree->Branch("time","TTimeStamp",&Evetime,10000,0);
-    fittree->Branch("xside","TGraphErrors",fxgraph,128000,0); 
-    fittree->Branch("yside","TGraphErrors",fygraph,128000,0); 
-
+    fittree->Branch("time","TTimeStamp",&Evetime,10000,0);
+    // add these two if you want to add the graph objects in the final tree
+    //fittree->Branch("xside","TGraphErrors",fxgraph,128000,0); 
+    //fittree->Branch("yside","TGraphErrors",fygraph,128000,0); 
+    //
     // section required to store angle and parameters - uncomment for using
-    // fittree->Branch("layer_multiplicity",&layermult,"xlmult/I:ylmult/I");
-    // fittree->Branch("tdc",&tdc,"xtdc[12]/D:ytdc[12]/D:xtdcmult[12]/i:ytdcmult[12]/i:tdcref/D");
-    // if(option==TString("MAG")){
-    //     fittree->Branch("X_Fit",&xfitparam2,"xp0:xp1:xp2:xerrp0:xerrp1:xerrp2:xndf:xchisq");
-    //     fittree->Branch("Y_Fit",&yfitparam2,"yp0:yp1:yp2:yerrp0:yerrp1:yerrp2:yndf:ychisq");
-    // }
-    // else{
-    //     fittree->Branch("X_Fit",&xfitparam1,"xp0:xp1:xerrp0:xerrp1:xndf:xchisq");
-    //     fittree->Branch("Y_Fit",&yfitparam1,"yp0:yp1:yerrp0:yerrp1:yndf:ychisq");
-    // }
-    // fittree->Branch("angle",&angle,"zen/f:azi/f");
-    // fittree->Branch("efficiency",&eff,"xeff[12]/i:yeff[12]/i");
+    fittree->Branch("layer_multiplicity",&layermult,"xlmult/I:ylmult/I");
+    fittree->Branch("tdc",&tdc,"xtdc[12]/D:ytdc[12]/D:xtdcmult[12]/i:ytdcmult[12]/i:tdcref/D");
+    if(option==TString("MAG")){
+        fittree->Branch("X_Fit",&xfitparam2,"xp0:xp1:xp2:xerrp0:xerrp1:xerrp2:xndf:xchisq");
+        fittree->Branch("Y_Fit",&yfitparam2,"yp0:yp1:yp2:yerrp0:yerrp1:yerrp2:yndf:ychisq");
+    }
+    else{
+        fittree->Branch("X_Fit",&xfitparam1,"xp0:xp1:xerrp0:xerrp1:xndf:xchisq");
+        fittree->Branch("Y_Fit",&yfitparam1,"yp0:yp1:yerrp0:yerrp1:yndf:ychisq");
+    }
+    fittree->Branch("angle",&angle,"zen/f:azi/f");
+    fittree->Branch("efficiency",&eff,"xeff[12]/i:yeff[12]/i");
     // end
 
     TString xname,yname;
@@ -180,9 +181,8 @@ Bool_t ino_analysis::Process(Long64_t entry)
     // GetGraphs
     GetXGraph();
     GetYGraph();
-
-    //    Multiplicity and Tdc
-    for(ii=0;ii<12;ii++){
+    //    Multiplicity and Tdc enable these line if you want to perform additional analysis of zenith angle
+     for(ii=0;ii<12;ii++){
         multiplicity.multx[ii]=xstriphits[ii]->CountBits();
         multiplicity.multy[ii]=ystriphits[ii]->CountBits();
         if(multiplicity.multx[ii]>0) layermult.xlmult++;
@@ -213,6 +213,7 @@ Bool_t ino_analysis::Process(Long64_t entry)
     //    if(angle.zen>0)
     //    histo->Fill(angle.zen);
     //    graph->SetPoint(ENum, ENum, angle.zen);
+
     return kTRUE;
 
 }
@@ -230,6 +231,7 @@ TGraphErrors* ino_analysis::GetXGraph(){
                     fxgraph->SetPoint(xxindx,ii,jj-Xresidual[ii]);//jj,BID);
                     fxgraph->SetPointError(xxindx,SIGMALAYER,SIGMASTRIP);
                     xxindx++;
+                    
                 }
             }
         }
@@ -253,6 +255,7 @@ TGraphErrors* ino_analysis::GetYGraph(){
                     fygraph->SetPoint(yyindx,ii,jj-Yresidual[ii]);//jj,BID);
                     fygraph->SetPointError(yyindx,SIGMALAYER,SIGMASTRIP);
                     yyindx++;
+                   
                 }
             }
         }
@@ -735,4 +738,19 @@ Bool_t ino_analysis::Notify()
     // user if needed. The return value is currently not used.
 
     return kTRUE;
+}
+
+// a function which returns a unique id for a strip 
+// x side layer 0 strip id will be from 0 -31
+// x side layer 1 strip id will be from 32 -63 
+// max strip id on xside will be 383
+// y side layer 0 strip id will be from 384 -415
+// y side layer 1 strip id will be from 416 -447 
+
+int ino_analysis::getStripID(int layer, int strip, bool isXside)
+{
+    if(isXside)
+    return (layer*NS) + strip;
+    else
+    return (NS*NL) + (layer*NS) + strip;
 }
